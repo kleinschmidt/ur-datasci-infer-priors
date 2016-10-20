@@ -1,0 +1,42 @@
+#+TITLE: UR Data Science guest lecture: Inferring prior beliefs
+
+Goals are
+
+1. Logic of inferring prior.
+2. (General points about modeling)   
+   1. Why didn't we do that in the first place?
+   2. Teach about cognitive modeling vs. machine learning.  Need to focus on
+      few points.
+   3. Goal was to show how /belief udpating/ explains behavior, and the so we
+      focused on making that point.
+3. Show power of bayesian approach: when your parameters are psychologically
+   meaningful, you can learn something meaningful out of basically parameter
+   estimation.
+4. Hands on tutorial for how to do this for the kind of data they have.
+5. (maybe) Pitfalls or difficulties of this kind of modeling: it's *not* as simple
+   as it might seem :(
+   
+* Some possible topics
+
+** General modeling workflow
+
+   Design model, fit to data, test out of sample.
+
+** Logic and math behind inferring prior
+
+   Simple demo app: can adjust prior beliefs, show what adaptation would look
+   like given different input.
+   
+** Hands on model fitting, challenges
+
+   What's tricky about fitting these models?  Gap between theory and actual
+   application.
+
+   Use Stan code to actually fit their own data.  They will have *some* data at
+   that point I think so this might be not a bad idea.
+
+** Stan
+
+   Pros and cons of stan. Reading stan code. Turning your model into a stan
+   model.
+
