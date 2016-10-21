@@ -40,3 +40,121 @@ Goals are
    Pros and cons of stan. Reading stan code. Turning your model into a stan
    model.
 
+* Florian's idea
+  
+#+BEGIN_QUOTE
+neat! I think the best class would a) briefly make students aware of the overall
+stuff available in beliefupdatr, b) go through the theoretical problem of
+inferring prior beliefs (conceptually already establish: we talked about the
+problem the listener faces vs. the problem the experimenter faces in
+understanding the listener; we also talked about that experimenter only has
+access to the listeners' responses and needs to therefore infer what listeners
+known, but we haven't yet talked in more detail about what that means; students
+also had exposure and explanation of K&J15 Eq 1-8), and c) have THEM figure out
+a small problem by themselves. But the class is only 1:10 and some people really
+need to leave right after.
+
+after that there's often folks sticking around and might have questions about
+further details. and if you'd be available to chat with shaorong and Wednesday
+later (Wed is one of the folks who needs to leave) that'd be great, too. I think
+those folks would benefit most from being walked through e.g., a particle filter
+implementation [I'd love to join if possible].
+
+But for the class let's focus on walking people through the theoretical and
+practical aspects of inferring the prior for the type of data they'll be dealing
+with (i.e., the type of data you've been eliciting).
+#+END_QUOTE
+
+* Plan
+
+  "walk through theoretical and practical aspects of inferring prior from the
+  type of data they'll be dealing with".
+
+** Theoretical aspects
+
+   At a high level, what are we doing?  "Inverting" Bayes rule in a belief
+   updating model: instead of treating prior beliefs as known, we treat them as
+   unkonwn and make inferences about them based on behavior.
+
+*** Terminology
+
+    * φ :: all the parameters of the prior beliefs
+    * θ :: parameters of the beliefs about categories: means and variances of each
+           category 
+    * xᵢ :: cue on trial i.
+    * cᵢ :: response on trial i.
+
+*** Goal
+
+    We want to infer the prior parameters φ based on behavior.  The behavior is in
+    the form of categorization resposnes c, and the cues x.  Mathematically,
+    this comes down to computing
+
+    p(φ | x, c) ∝ p(c | φ, x) p(φ)
+
+    Notice that this is already a little different from the normal
+    prior-likelihood breakdown: The cues x are still on the right side.  That's
+    because in this model, the likelihood is only determined by how well the
+    prior beliefs plus the input predicts the behavior.  We can think of this as
+    the "experimenter's likelihood": we're interested in the prior beliefs φ
+    from the perspective of experimenters, where the observed data that needs
+    to be explained is *subjects' behavior*, not the *talker's behavior*.
+
+    To get this likelihood in a recognizable form, we need to *marginalize* over
+    the listeners' beliefs θ.  That's because, as experimenters, we don't observe
+    them directly.  They're a *nuisance variable*.
+
+    p(c | x, φ) = ∫ dθ p(c, θ | x, φ)
+                = ∫ dθ p(c | x, θ) p(θ | x, φ)
+
+    This breaks things down into two easier parts: p(c | x , \theta), which is the
+    probability that a listener will say that cue x belongs to category c given
+    beliefs θ, and belief updating p(θ | φ, x)
+
+    This is conceptually very simple: it says that, to figure out how well a
+    given set of prior beliefs explains listeners behavior, all we need to do is
+    figure out how they would update those beliefs based on the experienced cues
+    x, and then compute how well those updated beliefs predict their responses.
+    Because we can't directly observe listeners' beliefs themselves, we have to
+    average over all the ways they might update their beliefs.
+    
+    Unfortunately, this /conceptual/ simplicity does not translate into
+    /computational/ simplicity.  The main problem is actually in the belief
+    updating bit: when there is more than one category, there's an exponential
+    explosion in the number of ways that listeners could update their beliefs
+    (one for every way to assign the observations to categories).  So we need to
+    make some approximations in order to make this tractable.
+
+*** Making things easy for ourselves
+
+    One way to do this is to cheat a bit: we can assume that listeners actually
+    know the cluster assignment of each observation.  This is essentially
+    equivalent to assuming that listeners can figure out, in the long run, that
+    there are two clusters with the mean and variance we have specified.  This
+    assumption, combined with the conjugate prior we've assumed thus far, makes
+    things /very/ easy, because we can analytically compute the posterior
+
+    p(θ | x, φ) = Nχ^{-2}(μn, σ²n, κn, νn)
+
+    and the classification function p(c | x, θ) (using the fact that the
+    posterior predictive is a t-distribution with parameters given in Murphy or
+    Kleinschmidt & Jaeger 2015).
+
+    Now it's a matter of using MCMC to get the distribution of φ for a
+    particular combination of exposure data and responses, which we can use
+    something off-the-shelf like Stan to do.
+
+    The other way to do this is to use something like a particle filter to
+    sample from likely assignments of observations to categories, and then
+    calculate the likelihood for each of these and take a weighted average.  But
+    that's a topic for another time...
+   
+** Hands on
+
+   Reading a stan model: basic syntax, blocks, variable declarations
+   
+   Formatting data in the way required for the Stan model.
+
+   Running the Stan model
+
+   Checking output
